@@ -565,3 +565,21 @@ You can have control over the query caching using
 can set its value to `qbits.hayt/->raw` if you prefer not to use query caching.
 The default uses `clojure.core.memoize` with a LU cache with a `:threshold`
 of 100.
+
+## `blob` data: `byte-array`s
+
+Cassandra `blob` columns can store Java `byte-array` data.
+
+Ex:
+
+```clojure
+(defn- update-byte-array!
+  [session id ^bytes ba]
+  (let [statement (alia/prepare session "INSERT into t (id, ba) VALUES (?, ?);")]
+    (alia/execute session statement {:values [id ba]})))
+```
+
+Notably, Alia returns the column data as a `java.nio.ByteBuffer`, but conversion back to a `byte-array` can be accomplished by calling `.array:
+ - https://docs.oracle.com/javase/8/docs/api/java/nio/ByteBuffer.html#array--
+
+For a working example, see `blob-test` in: [../test/qbits/alia_test.clj](../test/qbits/alia_test.clj).
